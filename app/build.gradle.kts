@@ -58,6 +58,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("androidx.compose.runtime:runtime-livedata:1.0.5")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0-alpha01")
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")

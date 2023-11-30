@@ -11,6 +11,7 @@ import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
+
 class login: ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
     private val _loading = MutableLiveData(false)
@@ -19,6 +20,7 @@ class login: ViewModel() {
     val error: LiveData<String> = _error
     private val _isAuthenticated = MutableLiveData<Boolean>()
     val isAuthenticated: LiveData<Boolean> = _isAuthenticated
+
 
     fun signInWithEmailAndPassword(email: String, password: String) = viewModelScope.launch {
         _loading.value = true

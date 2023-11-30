@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
@@ -9,7 +10,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-
+import androidx.lifecycle.viewmodel.*
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +58,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyApp()
+                    com.example.myapplication.login()
                 }
             }
         }
@@ -286,8 +289,15 @@ fun Screen3Content() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun login() {
+fun login(loginViewModel: login = login()) {
     // Contenido de la pantalla de inicio de sesión aquí
+    val isAuthenticated by loginViewModel.isAuthenticated.observeAsState()
+
+    if (isAuthenticated == true) {
+        // Si el usuario está autenticado, navega a la pantalla principal
+        MyApp()
+    } else {
+
 
     Box(
         modifier = Modifier
@@ -352,6 +362,9 @@ fun login() {
                 onClick = {
                     // Agrega la lógica de autenticación aquí
                     // Puedes usar los valores de 'username' y 'password'
+                    loginViewModel.signInWithEmailAndPassword(username, password)
+
+
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -377,8 +390,10 @@ fun login() {
                 },
                 modifier = Modifier.padding(top = 16.dp)
             )
+            }
         }
     }
+
 }
 
 
