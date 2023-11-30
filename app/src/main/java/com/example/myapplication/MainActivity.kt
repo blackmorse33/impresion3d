@@ -39,8 +39,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import java.time.format.TextStyle
+import com.example.myapplication.viewModel.login
 
 
 class MainActivity : ComponentActivity() {
@@ -286,6 +288,7 @@ fun Screen3Content() {
 @Composable
 fun login() {
     // Contenido de la pantalla de inicio de sesión aquí
+
     Box(
         modifier = Modifier
             .fillMaxSize()
