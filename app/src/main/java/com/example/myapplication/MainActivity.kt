@@ -1,8 +1,8 @@
 package com.example.myapplication
 
+import android.content.Context
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
@@ -10,42 +10,36 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.lifecycle.viewmodel.*
-import androidx.compose.runtime.getValue
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.*
 import com.example.myapplication.ui.theme.MyApplicationTheme
-import java.time.format.TextStyle
 import com.example.myapplication.viewModel.login
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 
 
 class MainActivity : ComponentActivity() {
@@ -150,7 +144,7 @@ fun MyApp() {
         Crossfade(targetState = screen, label = "") { screen ->
             when (screen) {
                 "Videos" -> Screen1Content()
-                "configuracion" -> Screen2Content()
+                "Tienda de Consumibles" -> Screen2Content()
                 "Herramientas" -> Screen3Content()
 
                 else -> HomeScreenContent()
@@ -162,7 +156,7 @@ fun MyApp() {
 @Composable
 fun Menusuperior(screen: String, onOptionSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val options = listOf("Home", "Opción 1", "Opción 2", "Opción 3")
+    val options = listOf("Home", "Videos", "Configuración", "Herramientas")
     Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
         TextButton(onClick = { expanded = true }) {
             Text(screen)
@@ -186,7 +180,47 @@ fun Menusuperior(screen: String, onOptionSelected: (String) -> Unit) {
 @Preview
 @Composable
 fun HomeScreenContent() {
-    // Contenido de la pantalla de inicio aquí
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Contenido de la pantalla de inicio aquí
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.impresora3d),
+                    contentDescription = "imagen de prueba",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "¡Explora nuestra plataforma de impresión 3D hoy mismo!")
+            }
+        }
+
+        // Repositorios 3D
+        Repositorios3DSection()
+
+        // Preguntas Frecuentes
+        PreguntasFrecuentesSection()
+
+        // Acceso a Cursos Recientes
+        CursosRecientesSection()
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun Screen1Content() {
     Card(
         modifier = Modifier
             .padding(100.dp),
@@ -203,17 +237,6 @@ fun HomeScreenContent() {
             Text(text = "¡Explora nuestra plataforma de impresión 3D hoy mismo!")
         }
     }
-
-}
-
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun Screen1Content() {
-
-
     // Contenido de la pantalla 1 aquí
 }
 
@@ -224,70 +247,40 @@ fun Screen1Content() {
 @Preview
 @Composable
 fun Screen2Content() {
-    //ConfiguracionContent()
+
 }
 
 
-/**
+
 
 @Composable
 fun ConfiguracionContent() {
     // Estado para el idioma seleccionado
     var idiomaSeleccionado by remember { mutableStateOf("Español") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Configuración")
+    // Estado para el control de notificaciones
+    var notificacionesActivadas by remember { mutableStateOf(true) }
 
-        // Función para crear un botón de idioma
-        fun IdiomaButton(idioma: String) {
-            Button(
-                onClick = { idiomaSeleccionado = idioma },
-                enabled = idiomaSeleccionado != idioma
-            ) {
-                Text(text = idioma)
-            }
-
-        }
-
-        // Botones de idioma
-        IdiomaButton("Español")
-        IdiomaButton("Inglés")
-
-        // Botón para cerrar sesión
-        Button(onClick = { /* Acción al cerrar sesión */ }) {
-            Text(text = "Cerrar Sesión")
-        }
-
-        // Opción para activar/desactivar notificaciones
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text(text = "Notificaciones")
-            Spacer(modifier = Modifier.width(16.dp))
-            // Aquí puedes agregar un Switch o Checkbox para activar/desactivar las notificaciones
-        }
-    }
+    ConfiguracionLista(
+        idiomaSeleccionado = idiomaSeleccionado,
+        onIdiomaSelected = { idiomaSeleccionado = it },
+        notificacionesActivadas = notificacionesActivadas,
+        onNotificacionesToggle = { notificacionesActivadas = it },
+        onCerrarSesion = { /* Lógica de cierre de sesión aquí */ }
+    )
 }
-**/
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun Screen3Content() {
-    // Contenido de la pantalla 3 aquí
+fun Screen3Content() {//configuracion de la app
+    ConfiguracionContent()
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun login(loginViewModel: login = login()) {
     // Contenido de la pantalla de inicio de sesión aquí
@@ -396,4 +389,184 @@ fun login(loginViewModel: login = login()) {
 
 }
 
+@Composable
+fun ConfiguracionLista(
+    idiomaSeleccionado: String,
+    onIdiomaSelected: (String) -> Unit,
+    notificacionesActivadas: Boolean,
+    onNotificacionesToggle: (Boolean) -> Unit,
+    onCerrarSesion: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Sección de idioma
+        Text(text = "Idioma")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            IdiomaButton("Español", idiomaSeleccionado, onIdiomaSelected)
+            IdiomaButton("Inglés", idiomaSeleccionado, onIdiomaSelected)
+        }
+
+        // Sección de notificaciones
+        Text(text = "Notificaciones")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Text(text = "Activar notificaciones")
+            Spacer(modifier = Modifier.width(16.dp))
+            Switch(
+                checked = notificacionesActivadas,
+                onCheckedChange = { onNotificacionesToggle(it) }
+            )
+        }
+
+        // Botón para cerrar sesión
+        Button(onClick = { onCerrarSesion() }) {
+            Text(text = "Cerrar Sesión")
+        }
+    }
+}
+
+@Composable
+fun IdiomaButton(idioma: String, idiomaSeleccionado: String, onIdiomaSelected: (String) -> Unit) {
+    Button(
+        onClick = { onIdiomaSelected(idioma) },
+        enabled = idiomaSeleccionado != idioma
+    ) {
+        Text(text = idioma)
+    }
+}
+
+data class Repositorio(
+    val url: String,
+    val imageResource: Int,
+    val nombre: String
+)
+@Composable
+fun Repositorios3DSection() {
+    // TODO: Puedes pasar una lista de repositorios como parámetro
+    // Por ejemplo: val repositorios: List<Repositorio> = ...
+
+    // Simulación de datos para mostrar un ejemplo
+    val repositorios = listOf(
+        Repositorio("https://www.thingiverse.com", R.drawable.thing, "thingiverse"),
+        Repositorio("https://www.printables.com/", R.drawable.printables, "printables"),
+        Repositorio("https://cults3d.com", R.drawable.cults_large, "cults3d")
+    )
+
+    SectionTitle("Repositorios 3D")
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+    ) {
+        items(repositorios) { repositorio ->
+            RepositorioCard(repositorio)
+        }
+    }
+}
+
+
+@Composable
+fun PreguntasFrecuentesSection() {
+    // TODO: Puedes agregar preguntas frecuentes aquí
+
+    SectionTitle("Preguntas Frecuentes")
+
+    // Contenido de preguntas frecuentes
+    // ...
+
+    // Ejemplo de un recuadro redondeado
+    RoundedBox("¿Cómo puedo empezar con la impresión 3D?")
+}
+
+@Composable
+fun CursosRecientesSection() {
+    // TODO: Puedes agregar cursos recientes aquí
+
+    SectionTitle("Cursos Recientes")
+
+    // Contenido de cursos recientes
+    // ...
+
+    // Ejemplo de un recuadro redondeado
+    RoundedBox("Curso Avanzado de Modelado 3D")
+}
+
+@Composable
+fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        style = androidx.compose.ui.text.TextStyle(
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        ),
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+}
+@Composable
+fun RepositorioCard(repositorio: Repositorio) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .width(100.dp),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Imagen cliclable para abrir el enlace
+            val context = LocalContext.current
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(shape = RoundedCornerShape(4.dp))
+                    .clickable {
+                        val uri = Uri.parse(repositorio.url)
+                        val intent = Intent(Intent.ACTION_VIEW, uri)
+                        // Lanzar la intención
+                        context.startActivity(intent)
+                    }
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            // Nombre del repositorio
+            Text(text = repositorio.nombre)
+        }
+    }
+}
+
+@Composable
+fun RoundedBox(content: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(8.dp),
+
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = content,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
 
