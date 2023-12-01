@@ -129,7 +129,7 @@ fun MyApp() {
                 "Videos" -> Screen1Content(idiomaSeleccionado)
                 "Tienda de Consumibles" -> Screen2Content()
                 "Configuracion" -> Screen3Content(idiomaSeleccionado)
-                "Noticias" -> Screen3Content(idiomaSeleccionado)
+                "Noticias" -> Screen4Content()
 
                 else -> HomeScreenContent()
             }
@@ -325,7 +325,7 @@ fun Screen4Content() {
 
         ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(50.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.notimageci),
