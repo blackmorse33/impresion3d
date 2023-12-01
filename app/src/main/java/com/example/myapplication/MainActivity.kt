@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.content.Context
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -27,7 +26,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,8 +36,14 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.viewModel.login
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
+
+import kotlin.random.Random
 
 
 class MainActivity : ComponentActivity() {
@@ -126,7 +130,7 @@ fun registro(){
 @Composable
 fun MyApp() {
     val (screen, setScreen) = remember { mutableStateOf("Menu") }
-
+    var idiomaSeleccionado by remember { mutableStateOf("Español") }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -143,9 +147,10 @@ fun MyApp() {
     ) {
         Crossfade(targetState = screen, label = "") { screen ->
             when (screen) {
-                "Videos" -> Screen1Content()
-                "Tienda de Consumibles" -> Screen2Content()
-                "Herramientas" -> Screen3Content()
+                "Videos" -> Screen1Content(idiomaSeleccionado)
+                "Tienda de Consumibles" -> Screen2Content(idiomaSeleccionado)
+                "Configuracion" -> Screen3Content(idiomaSeleccionado)
+                "Noticias" -> Screen3Content(idiomaSeleccionado)
 
                 else -> HomeScreenContent()
             }
@@ -156,7 +161,7 @@ fun MyApp() {
 @Composable
 fun Menusuperior(screen: String, onOptionSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val options = listOf("Home", "Videos", "Configuración", "Herramientas")
+    val options = listOf("Home", "Videos", "Tienda de Consumibles", "Configuracion", "Noticias")
     Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
         TextButton(onClick = { expanded = true }) {
             Text(screen)
@@ -180,6 +185,11 @@ fun Menusuperior(screen: String, onOptionSelected: (String) -> Unit) {
 @Preview
 @Composable
 fun HomeScreenContent() {
+    var selectedScreen by remember { mutableStateOf("Home") }
+    Menusuperior(selectedScreen) { screen ->
+        selectedScreen = screen
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -216,11 +226,54 @@ fun HomeScreenContent() {
     }
 }
 
+val videos = listOf(
+    video("Share Horizons", "https://www.youtube.com/@SHAREHORIZONS","Español"),
+    video("Control 3D", "https://www.youtube.com/@Control3D","Español"),
+    video("Tu rincón 3D", "https://www.youtube.com/@Turincon3d","Español"),
+    video("JC 3Design", "https://www.youtube.com/@JuanCarlos_3design","Español"),
+    video("The Maker 3DP", "https://www.youtube.com/@TheMaker3DP","Español"),
+    video("Govaju 3DPrinting", "https://www.youtube.com/@govaju3D","Español"),
+    video("El canal del Señor ferrete", "https://www.youtube.com/@SrFerrete","Español"),
+    video("Adafruit Industries", "https://www.youtube.com/@adafruit","Español"),
+    video("3D Now", "https://www.youtube.com/@3DNow","Inglés"),
+    video("Maker's Muse", "https://www.youtube.com/@MakersMuse","Inglés"),
+    video("Thomas Sanladerer", "https://www.youtube.com/@MadeWithLayers","Inglés"),
+    video("3D Printing Nerd", "https://www.youtube.com/@3DPrintingNerd","Inglés"),
+    video("Joel Telling - 3D Printing Nerd", "https://www.youtube.com/@thenextlayer","Inglés"),
+    video("I Like To Make Stuff", "https://www.youtube.com/@Iliketomakestuff","Inglés"),
+    video("MatterHackers", "https://www.youtube.com/@MatterHackers","Inglés")
+
+)
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun Screen1Content() {
+fun Screen1Content(idiomaSeleccionado: String) {
+    var idiomaSeleccionado by remember { mutableStateOf("") }
+    var notificacionesActivadas by remember { mutableStateOf(true) }
+
+    Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                VideoPlayer(videos, idiomaSeleccionado)
+
+                Text(text = "¡Explora nuestra plataforma de impresión 3D hoy mismo!")
+        }
+    }
+
+}
+
+
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Screen2Content(idiomaSeleccionado: String) {
     Card(
         modifier = Modifier
             .padding(100.dp),
@@ -237,24 +290,15 @@ fun Screen1Content() {
             Text(text = "¡Explora nuestra plataforma de impresión 3D hoy mismo!")
         }
     }
-    // Contenido de la pantalla 1 aquí
-}
-
-
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun Screen2Content() {
-
 }
 
 
 
 
+
+
 @Composable
-fun ConfiguracionContent() {
+fun ConfiguracionContent(idiomaSeleccionado: String) {
     // Estado para el idioma seleccionado
     var idiomaSeleccionado by remember { mutableStateOf("Español") }
 
@@ -273,10 +317,9 @@ fun ConfiguracionContent() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun Screen3Content() {//configuracion de la app
-    ConfiguracionContent()
+fun Screen3Content(idiomaSeleccionado: String) {//configuracion de la app
+    ConfiguracionContent(idiomaSeleccionado)
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -397,6 +440,10 @@ fun ConfiguracionLista(
     onNotificacionesToggle: (Boolean) -> Unit,
     onCerrarSesion: () -> Unit
 ) {
+    // Utiliza remember para mantener el estado de la configuración
+    var idiomaSeleccionadoState by remember { mutableStateOf(idiomaSeleccionado) }
+    var notificacionesActivadasState by remember { mutableStateOf(notificacionesActivadas) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -410,8 +457,14 @@ fun ConfiguracionLista(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            IdiomaButton("Español", idiomaSeleccionado, onIdiomaSelected)
-            IdiomaButton("Inglés", idiomaSeleccionado, onIdiomaSelected)
+            IdiomaButton("Español", idiomaSeleccionadoState) {
+                idiomaSeleccionadoState = "Español"
+                onIdiomaSelected(idiomaSeleccionadoState)
+            }
+            IdiomaButton("Inglés", idiomaSeleccionadoState) {
+                idiomaSeleccionadoState = "Inglés"
+                onIdiomaSelected(idiomaSeleccionadoState)
+            }
         }
 
         // Sección de notificaciones
@@ -423,8 +476,11 @@ fun ConfiguracionLista(
             Text(text = "Activar notificaciones")
             Spacer(modifier = Modifier.width(16.dp))
             Switch(
-                checked = notificacionesActivadas,
-                onCheckedChange = { onNotificacionesToggle(it) }
+                checked = notificacionesActivadasState,
+                onCheckedChange = {
+                    notificacionesActivadasState = it
+                    onNotificacionesToggle(it)
+                }
             )
         }
 
@@ -450,6 +506,19 @@ data class Repositorio(
     val imageResource: Int,
     val nombre: String
 )
+
+data class Review(val text: String, val author: String)
+
+data class video(val name: String, val url: String, val idioma: String)
+
+val reviews = listOf(
+    Review("Excelente aplicación.", " Usuario A"),
+    Review("Muy útil para principiantes.", "Usuario B"),
+    Review("Necesita mejoras en la interfaz.", "Usuario C")
+)
+
+
+
 @Composable
 fun Repositorios3DSection() {
     // TODO: Puedes pasar una lista de repositorios como parámetro
@@ -459,7 +528,10 @@ fun Repositorios3DSection() {
     val repositorios = listOf(
         Repositorio("https://www.thingiverse.com", R.drawable.thing, "thingiverse"),
         Repositorio("https://www.printables.com/", R.drawable.printables, "printables"),
-        Repositorio("https://cults3d.com", R.drawable.cults_large, "cults3d")
+        Repositorio("https://cults3d.com", R.drawable.cults_large, "cults3d"),
+        Repositorio("https://grabcad.com/library", R.drawable.cults_large, "Grabcad")
+
+
     )
 
     SectionTitle("Repositorios 3D")
@@ -549,24 +621,173 @@ fun RepositorioCard(repositorio: Repositorio) {
 
 @Composable
 fun RoundedBox(content: String) {
-    Card(
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(8.dp),
-
+            .fillMaxSize()
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = content,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxSize()
-            )
+        items(reviews) { review ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = review.text)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "- ${review.author}")
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+@Composable
+fun VideoPlayer(
+    videos: List<video>,
+    idiomaSeleccionado: String
+) {
+    val videosFiltrados = when (idiomaSeleccionado) {
+        "Español" -> videos.filter { it.idioma == "Español" }
+        "Inglés" -> videos.filter { it.idioma == "Inglés" }
+        else -> videos
+    }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        item {
+            // Título centrado con recuadro tipo Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 25.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Canales/Channels",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
+            }
+        }
+
+
+        itemsIndexed(videosFiltrados) { _, video ->
+            // Genera un color de fondo aleatorio para cada Card
+            val backgroundColor = Color(android.graphics.Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
+            val context = LocalContext.current
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(color = backgroundColor)
+                    .clickable {
+                        // Abre la aplicación de YouTube al hacer clic
+                        val youtubeIntent = Intent(Intent.ACTION_VIEW, Uri.parse(video.url))
+                        context.startActivity(youtubeIntent)
+                    }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Box con fondo de color detrás del Icon
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(color = backgroundColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Icono de reproducción predeterminado
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = Color.White // Tinte del icono
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // Nombre del canal
+                    Text(text = video.name, fontWeight = FontWeight.Bold)
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Text(text = video.idioma, fontWeight = FontWeight.Thin)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
+
+
+
+data class Noticia(val titulo: String, val descripcion: String, val imagenUrl: String)
+/**
+@Composable
+fun NoticiaCard(noticia: Noticia, onNoticiaClick: (Noticia) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onNoticiaClick(noticia) },
+
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Imagen de la noticia
+            Image(
+                painter = rememberImagePainter(noticia.imagenUrl),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(shape = RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            // Título de la noticia
+            Text(
+                text = noticia.titulo,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // Descripción de la noticia
+            Text(
+                text = noticia.descripcion,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+**/
+/**
+@Composable
+fun NoticiasSection(noticias: List<Noticia>, onNoticiaClick: (Noticia) -> Unit) {
+    LazyColumn {
+        items(noticias) { noticia ->
+            NoticiaCard(noticia = noticia, onNoticiaClick = onNoticiaClick)
+        }
+    }
+}
+**/
