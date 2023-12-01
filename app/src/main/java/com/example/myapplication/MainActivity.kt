@@ -1,6 +1,10 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,12 +40,14 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.viewModel.login
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.NotificationCompat
 
 import kotlin.random.Random
 
@@ -96,33 +102,6 @@ fun LateralMenu(expandedState: MutableState<Boolean>) {
 
 
 
-@Composable
-fun BodyContent(modifier: Modifier = Modifier) {
-    // Contenido de tu aplicación aquí
-}
-
-@Composable
-fun noticia() {
-
-}
-
-
-@Composable
-fun cursos(){
-
-}
-
-
-@Composable
-fun sesion(){
-
-}
-
-
-@Composable
-fun registro(){
-
-}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +127,7 @@ fun MyApp() {
         Crossfade(targetState = screen, label = "") { screen ->
             when (screen) {
                 "Videos" -> Screen1Content(idiomaSeleccionado)
-                "Tienda de Consumibles" -> Screen2Content(idiomaSeleccionado)
+                "Tienda de Consumibles" -> Screen2Content()
                 "Configuracion" -> Screen3Content(idiomaSeleccionado)
                 "Noticias" -> Screen3Content(idiomaSeleccionado)
 
@@ -157,6 +136,8 @@ fun MyApp() {
         }
     }
 }
+
+
 
 @Composable
 fun Menusuperior(screen: String, onOptionSelected: (String) -> Unit) {
@@ -225,6 +206,7 @@ fun HomeScreenContent() {
         CursosRecientesSection()
     }
 }
+data class video(val name: String, val url: String, val idioma: String)
 
 val videos = listOf(
     video("Share Horizons", "https://www.youtube.com/@SHAREHORIZONS","Español"),
@@ -244,6 +226,7 @@ val videos = listOf(
     video("MatterHackers", "https://www.youtube.com/@MatterHackers","Inglés")
 
 )
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -272,25 +255,35 @@ fun Screen1Content(idiomaSeleccionado: String) {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
+@Preview
 @Composable
-fun Screen2Content(idiomaSeleccionado: String) {
+fun Screen2Content() {
     Card(
         modifier = Modifier
-            .padding(100.dp),
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.impresora3d),
+                painter = painterResource(id = R.drawable.notimage),
                 contentDescription = "imagen de prueba",
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "¡Explora nuestra plataforma de impresión 3D hoy mismo!")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ConsumiblesList(consumibles)
     }
+
+
 }
+
 
 
 
@@ -321,6 +314,35 @@ fun ConfiguracionContent(idiomaSeleccionado: String) {
 fun Screen3Content(idiomaSeleccionado: String) {//configuracion de la app
     ConfiguracionContent(idiomaSeleccionado)
 }
+
+@Preview
+@Composable
+fun Screen4Content() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+
+        ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.notimageci),
+                contentDescription = "imagen de prueba",
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "¡Explora nuestra plataforma de impresión 3D hoy mismo!")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        NotList(Noticias)
+    }
+
+}
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -432,6 +454,9 @@ fun login(loginViewModel: login = login()) {
 
 }
 
+
+
+
 @Composable
 fun ConfiguracionLista(
     idiomaSeleccionado: String,
@@ -440,10 +465,7 @@ fun ConfiguracionLista(
     onNotificacionesToggle: (Boolean) -> Unit,
     onCerrarSesion: () -> Unit
 ) {
-    // Utiliza remember para mantener el estado de la configuración
-    var idiomaSeleccionadoState by remember { mutableStateOf(idiomaSeleccionado) }
-    var notificacionesActivadasState by remember { mutableStateOf(notificacionesActivadas) }
-
+    val notificationManager = LocalContext.current.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -451,20 +473,21 @@ fun ConfiguracionLista(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.notimag),
+            contentDescription = "imagen de prueba",
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Sección de idioma
         Text(text = "Idioma")
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            IdiomaButton("Español", idiomaSeleccionadoState) {
-                idiomaSeleccionadoState = "Español"
-                onIdiomaSelected(idiomaSeleccionadoState)
-            }
-            IdiomaButton("Inglés", idiomaSeleccionadoState) {
-                idiomaSeleccionadoState = "Inglés"
-                onIdiomaSelected(idiomaSeleccionadoState)
-            }
+            IdiomaButton("Español", idiomaSeleccionado, onIdiomaSelected)
+            IdiomaButton("Inglés", idiomaSeleccionado, onIdiomaSelected)
         }
 
         // Sección de notificaciones
@@ -476,16 +499,18 @@ fun ConfiguracionLista(
             Text(text = "Activar notificaciones")
             Spacer(modifier = Modifier.width(16.dp))
             Switch(
-                checked = notificacionesActivadasState,
+                checked = notificacionesActivadas,
                 onCheckedChange = {
-                    notificacionesActivadasState = it
                     onNotificacionesToggle(it)
+
+                    // Código de notificación
+
                 }
             )
         }
 
         // Botón para cerrar sesión
-        Button(onClick = { onCerrarSesion() }) {
+        Button(onClick = {  }) {
             Text(text = "Cerrar Sesión")
         }
     }
@@ -509,7 +534,9 @@ data class Repositorio(
 
 data class Review(val text: String, val author: String)
 
-data class video(val name: String, val url: String, val idioma: String)
+
+
+
 
 val reviews = listOf(
     Review("Excelente aplicación.", " Usuario A"),
@@ -737,7 +764,9 @@ fun VideoPlayer(
 
 
 
-data class Noticia(val titulo: String, val descripcion: String, val imagenUrl: String)
+
+
+
 /**
 @Composable
 fun NoticiaCard(noticia: Noticia, onNoticiaClick: (Noticia) -> Unit) {
@@ -791,3 +820,94 @@ fun NoticiasSection(noticias: List<Noticia>, onNoticiaClick: (Noticia) -> Unit) 
     }
 }
 **/
+data class Noticia(val titulo: String, val descripcion: String, val enlace: String)
+
+val Noticias = listOf(
+    Noticia("3Dnatives", "Este sitio ofrece noticias, comparativas, precios y mucho más sobre impresión 3D e impresoras 3D. También puedes encontrar noticias específicas sobre impresoras 3D.", "https://www.3dnatives.com"),
+    Noticia("Redacción Médica", "Este sitio ofrece noticias sobre la aplicación de la impresión 3D en el campo de la medicina.", "https://www.redaccionmedica.com"),
+    Noticia("LA NACION", "Este sitio ofrece las últimas noticias sobre impresoras 3D.", "https://www.lanacion.com.ar"),
+    Noticia("ELTIEMPO.COM", "Este sitio ofrece noticias sobre diferentes aplicaciones de la impresión 3D.", "https://www.eltiempo.com")
+
+)
+
+@Composable
+fun NotList(Noticias: List<Noticia>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        itemsIndexed(Noticias) { _, Noticia ->
+            // Genera un color de fondo aleatorio para cada Card
+            val backgroundColor = Color(android.graphics.Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
+            val context = LocalContext.current
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(color = backgroundColor)
+                    .clickable {
+                        // Abre el enlace al hacer clic
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(Noticia.enlace))
+                        context.startActivity(intent)
+                    }
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    // Aquí puedes mostrar información específica del consumible (título, descripción, etc.)
+                    Text(text = Noticia.titulo, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = Noticia.descripcion)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+
+
+@Composable
+fun ConsumiblesList(consumibles: List<Consumible>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        itemsIndexed(consumibles) { _, consumible ->
+            // Genera un color de fondo aleatorio para cada Card
+            val backgroundColor = Color(android.graphics.Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
+            val context = LocalContext.current
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(color = backgroundColor)
+                    .clickable {
+                        // Abre el enlace al hacer clic
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(consumible.enlace))
+                        context.startActivity(intent)
+                    }
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    // Aquí puedes mostrar información específica del consumible (título, descripción, etc.)
+                    Text(text = consumible.titulo, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = consumible.descripcion)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+data class Consumible(val titulo: String, val descripcion: String, val enlace: String)
+
+val consumibles = listOf(
+    Consumible("Imperio 3D", "Es una tienda especializada en impresoras 3D e insumos para impresión 3D. Ofrecen las mejores marcas de impresoras 3D, filamentos y resinas.", "https://www.imperio3d.com"),
+    Consumible("3D FACTORY MX", "Es una tienda de impresora 3D, Resina, PLA, Filamento, Rollos para tu Impresión 3D. Son proveedores autorizados de POLYMAKER, MAKERBOT, Zortrax, ESUN, Creality3D, SUNLU, Sainsmart. Manejan PLA, ABS, HIPS, PETG, TPU, PC, PA12, Nylon.", "https://www.3dfactory.mx"),
+    Consumible("3Dnatives", "En este sitio puedes encontrar distribuidores de consumibles para impresoras 3D, en España, América Latina y a nivel internacional.", "https://www.3dnatives.com"),
+    Consumible("Thingiverse", "Estos sitios web ofrecen un amplio catálogo de modelos gratuitos y de pago, además de un foro, piezas de repuesto para tu impresora, concursos y diferentes proyectos ordenados por temática.", "https://www.thingiverse.com"),
+    Consumible("Cults3d", "Estos sitios web ofrecen un amplio catálogo de modelos gratuitos y de pago, además de un foro, piezas de repuesto para tu impresora, concursos y diferentes proyectos ordenados por temática.", "https://www.cults3d.com")
+)
